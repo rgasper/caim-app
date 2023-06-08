@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from phonenumber_field.modelfields import PhoneNumberField
+from typing import List, Optional
 
 from ..states import states
 
@@ -208,3 +209,30 @@ class FostererProfile(models.Model):
     )
     is_complete = models.BooleanField(default=False)
 
+
+def query_fostererprofiles(
+    behavioural_attributes: Optional[List[str]] = None,
+    is_complete=True,
+    sort: Optional[str | List[str]] = ["firstname" , "lastname"],
+) -> models.QuerySet:
+    """
+      Query fosterer profiles with preferred defaults  
+    """
+
+    query = FostererProfile.objects.all()
+
+    
+    if behavioural_attributes:
+        query = query.filter(behavioural_attributes__contains=behavioural_attributes)
+
+    if is_complete:
+        query = query.filter(is_complete=True)
+
+    if sort is not None:
+        if isinstance(sort, list):
+            for s in sort:
+                query = query.order_by(s)
+        else:
+            query = query.order_by(sort)
+
+    return query

@@ -23,6 +23,7 @@ from caim_base.views import (
     auth,
     animal,
     browse,
+    browse_fosterers,
     comments,
     user_profile,
     fosterer_profile,
@@ -103,6 +104,8 @@ urlpatterns = [
     ),
     path("organization/<awg_id>", awg.view, name="awg"),
     path("utils/users-csv", user_csv_download.view, name="user_csv_download"),
+    path("fosterers", browse_fosterers.view, name="browse_fosterers"),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
 
 if settings.DEBUG:

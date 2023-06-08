@@ -1,0 +1,109 @@
+{% extends "base/wrapper.html" %}
+{% load caim_helpers %}
+{% load static %}
+
+
+{% block content %}
+<style>
+  .filter-button{
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+    text-align: center !important;
+    z-index: 100; 
+    display: block;
+  }
+  @media (min-width: 768px) {
+    .collapse.dont-collapse-sm {
+      display: block;
+      height: auto !important;
+      visibility: visible;
+    }
+  }
+</style>
+<div class="bg-dark context-bar">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 py-2 text-center text-md-start">
+        <p class="text-light mt-2 mb-1">Showing {{ paginator.count }} Foster Home{{paginator.count|pluralize}} 
+          {% if search.zip %}
+            within
+            {% if search.radius %}{{search.radius}} miles{% else %}any distance{% endif %}
+            of {{ search.zip }}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-3 mb-3 collapse dont-collapse-sm" id="searchFilters">
+      <div class="card sticky-top" style="top:80px;">
+        <div class="card-body">
+          <form action="/browse_fosterers" method="get">
+            <input type="hidden" name="zip" value="{{search.zip|default:''}}" />
+            <div class="filter">
+              Experience With Behaviors:
+              {% for ba in behavioural_attributes.items %}
+              <div>
+                <label>
+                  <input type="checkbox" name="{{ba.0}}" {% if search.at0 %}checked{% endif %} /> 
+                  {{ba.1}}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="text-center">
+              <input type="submit" class="btn btn-primary" value="Update filters" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="row">
+        {% for fstr in fosterers %}
+        <div class="col-md-4">
+          <div class="card animal-card">
+            <div class="card-img-top" style="background-color: #eee; background-image: url({% static 'img/user-icon.jpeg' %});">
+            </div>
+            <div class="card-body">
+              <h5>{{fstr.firstname|title}} {{fstr.lastname|title}}</h5>
+              <div class="text-truncate text-xsmall">
+                <p>{{fstr.city}} {{fstr.state}}, {{fstr.zip_code}}</p>
+                <p>what else goes here?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No foster homes found. Please try different filters.</p>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <nav>
+            <ul class="pagination justify-content-md-start justify-content-center">
+              {% if fosterers.has_previous %}
+              <li class="page-item"><a class="page-link"
+                  href="{% modify_qs 'page' fosterers.previous_page_number %}">&laquo; Prev</a></li>
+              {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">&laquo; Prev</a></li>
+              {% endif %}
+              <li class="page-item disabled"><a class="page-link" href="#">Page {{ fosterers.number }} of {{ paginator.num_pages }}</a></li>
+              {% if fosterers.has_next %}
+              <li class="page-item"><a class="page-link" href="{% modify_qs 'page' fosterers.next_page_number %}">Next
+                  &raquo;</a></li>
+              {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">Next &raquo;</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
