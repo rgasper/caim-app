@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from phonenumber_field.modelfields import PhoneNumberField
 from typing import List, Optional
+from caim_base.models.animals import Animal
 
 from ..states import states
 
@@ -236,3 +237,19 @@ def query_fostererprofiles(
             query = query.order_by(sort)
 
     return query
+
+
+class FosterApplication(models.Model):
+    
+    class FosterApplicationStatus(models.TextChoices):
+        ACCEPTED = "ACCEPTED", "Accepted"
+        REJECTED = "REJECTED", "Rejected"
+        PENDING = "PENDING", "Pending"
+
+    fosterer = models.ForeignKey(FostererProfile, on_delete=models.CASCADE)
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
+    status = models.CharField(max_length=32, choices=FosterApplicationStatus.choices)
+    reject_reason = models.TextField(max_length=65516, null=True, blank=True)
+    submitted_on = models.DateField(auto_now_add=True)
+    updated_on = models.DateField(auto_now=True)
+    

@@ -14,7 +14,7 @@ from faker import Faker
 from caim_base.models.animals import (Animal, AnimalImage, AnimalType, Breed,
                                       ZipCode)
 from caim_base.models.awg import Awg
-from caim_base.models.fosterer import FostererProfile
+from caim_base.models.fosterer import FosterApplication, FostererProfile
 
 fake = Faker()
 
@@ -185,8 +185,8 @@ def load_animals(animal_type, file_name):
             print("SKIPPEd")
 
 
-def load_fosterers(num_desired_fosterers: int):
-    print("loading fake fosterers...")
+def fake_fosterers(num_desired_fosterers: int):
+    print("generating fake fosterers...")
     fosterers = []
     for _ in range(num_desired_fosterers):
         # going through the fields in the same order they appear in the model
@@ -260,15 +260,34 @@ def load_fosterers(num_desired_fosterers: int):
     FostererProfile.objects.bulk_create(fosterers)
 
 
-# Animal.objects.all().delete()
-# Awg.objects.all().delete()
-# Breed.objects.all().delete()
+def fake_foster_applications(num_desired_applications: int):
+    print("generating fake foster applications...")
+    animals = Animal.objects.all()
+    fosterers = FostererProfile.objects.all()
+    applications = []
+    for _ in range(num_desired_applications):
+        application = FosterApplication()
+        application.animal = choice(animals)
+        application.fosterer = choice(fosterers)
+        application.status = choice([choice[0] for choice in application.FosterApplicationStatus.choices])
+        if application.status == application.FosterApplicationStatus.REJECTED:
+            application.reject_reason = fake.text(1000)
+        application.full_clean()
+        applications.append(application)
+    FosterApplication.objects.bulk_create(applications)
 
-# load_zips()
-# load_breeds("dog", "seed_data/dog-breeds.json")
-# load_breeds("cat", "seed_data/cat-breeds.json")
 
-# load_animals("dog", "seed_data/dogs.json")
-# load_animals("dog", "seed_data/dogs2.json")
-# load_animals("dog", "seed_data/dogs3.json")
-load_fosterers(50)
+Animal.objects.all().delete()
+Awg.objects.all().delete()
+Breed.objects.all().delete()
+
+load_zips()
+load_breeds("dog", "seed_data/dog-breeds.json")
+load_breeds("cat", "seed_data/cat-breeds.json")
+
+load_animals("dog", "seed_data/dogs.json")
+load_animals("dog", "seed_data/dogs2.json")
+load_animals("dog", "seed_data/dogs3.json")
+
+fake_fosterers(50)
+fake_foster_applications(50)
